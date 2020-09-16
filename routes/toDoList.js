@@ -3,27 +3,44 @@ var router = express.Router();
 var sqlite3 = require('sqlite3');
 var db = new sqlite3.Database('test.db');
 
-var queryToDoList = [];
+// var queryToDoList = [];
 
-const getAllToDoList = () => {
-        db.each("SELECT ToDoListID, Title FROM ToDoList;", (err, row) => {
-            queryToDoList.push({'ToDoListID': row.ToDoListID, 'Title': row.Title});
-        });
-};
+// const getAllToDoList = () => {
+//     db.serialize(() => {
+//         db.each("SELECT ToDoListID, Title FROM ToDoList;", (err, row) => {
+//             queryToDoList.push({'ToDoListID': row.ToDoListID, 'Title': row.Title});
+//         });
+//     });
+// };
 
-getAllToDoList();
+// db.all("SELECT * FROM ToDoList;", (err, rows) => {
+//     console.log(rows);
+//     console.log("db all fin", typeof rows);
+// });
 
 router.get('/', (req, res, next) => {    
-    getAllToDoList();
-    res.send(queryToDoList);
-    queryToDoList = [];
+    // getAllToDoList();
+
+    db.all("SELECT * FROM ToDoList;", (err, rows) => {
+        // console.log(rows);
+        // console.log("db all fin", typeof rows);
+        res.send(rows);
+    });
+    
+    // queryToDoList = [];
 });
 
 
 router.get('/:id', (req, res, next) => {
-    getAllToDoList();
-    res.send(queryToDoList.filter(item => {return item.ToDoListID == req.params.id}));
-    queryToDoList = [];
+    // getAllToDoList();
+    
+    db.all("SELECT * FROM ToDoList;", (err, rows) => {        
+        rows.forEach((item) => {
+            if(item.ToDoListID === parseInt(req.params.id)) {res.send(item);}
+        });
+    });
+
+    // queryToDoList = [];
 });
 
 
