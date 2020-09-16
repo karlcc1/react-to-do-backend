@@ -7,11 +7,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 const sqlite3 = require('sqlite3');
+var db = new sqlite3.Database('./test.db');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var testAPIRouter = require('./routes/testAPI');
 var toDoListRouter = require('./routes/toDoList');
+var toDoItemsRouter = require('./routes/toDoItems');
+
 const { appendFileSync } = require('fs');
 const { runInContext } = require('vm');
 
@@ -32,6 +35,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/testAPI', testAPIRouter);
 app.use('/toDoList', toDoListRouter);
+app.use('/toDoItems', toDoItemsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -50,6 +54,27 @@ app.use(function(err, req, res, next) {
 });
 
 const populatedb = () => {
+
+  // db.run(sqlinsert1, ['One']);
+  // db.run(sqlinsert1, ['Two']);
+  // db.run(sqlinsert1, ['Three']);
+  // db.run(sqlinsert1, ['Four']);
+  // console.log("inserted into todolist");
+
+  // var queryToDoList = [];
+
+  // db.serialize(() => {
+  //   db.each("SELECT ToDoListID, Title FROM ToDoList;", (err, row) => {
+  //     console.log(row.ToDoListID + ": " + row.Title);
+  //     queryToDoList.push({ToDoListID: row.ToDoListID, Title: row.Title});
+  //     console.log(queryToDoList);
+  //   })
+  // });
+
+};
+
+db.serialize(() => {
+
   const sql_create1 = `CREATE TABLE IF NOT EXISTS ToDoList (
     ToDoListID INTEGER PRIMARY KEY AUTOINCREMENT,
     Title TEXT);`;
@@ -65,34 +90,14 @@ const populatedb = () => {
   const sqlinsert1 = `INSERT INTO ToDoList (Title) VALUES (?);`;
     
   db.run(sql_create1);
-  console.log("todolist table created");
+  console.log("todolist table init");
   
   db.run(sql_create2);
-  console.log("todoitems table created");
-  
-  // db.run(sqlinsert1, ['One']);
-  // db.run(sqlinsert1, ['Two']);
-  // db.run(sqlinsert1, ['Three']);
-  // console.log("inserted into todolist");
-};
+  console.log("todoitems table init");
 
-const querydb = () => {
-  const query1 = `SELECT * FROM ToDoList;`;
-  const res_query1 = db.all(query1);
-  console.log(res_query1);
-};
+  db.close();
+});
 
-var db = new sqlite3.Database('./test.db', (err) => {
-  if (err) {
-    console.log('Could not connect to database', err)
-  } else {
-    console.log('Connected to database');
-    db.serialize(populatedb);
-    db.close();
-  }
-})
-
-
-
+console.log("db init fin");
 
 module.exports = app;
