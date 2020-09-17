@@ -3,44 +3,40 @@ var router = express.Router();
 var sqlite3 = require('sqlite3');
 var db = new sqlite3.Database('test.db');
 
-// var queryToDoList = [];
 
-// const getAllToDoList = () => {
-//     db.serialize(() => {
-//         db.each("SELECT ToDoListID, Title FROM ToDoList;", (err, row) => {
-//             queryToDoList.push({'ToDoListID': row.ToDoListID, 'Title': row.Title});
-//         });
-//     });
-// };
-
-// db.all("SELECT * FROM ToDoList;", (err, rows) => {
-//     console.log(rows);
-//     console.log("db all fin", typeof rows);
-// });
 
 router.get('/', (req, res, next) => {    
-    // getAllToDoList();
-
     db.all("SELECT * FROM ToDoList;", (err, rows) => {
-        // console.log(rows);
-        // console.log("db all fin", typeof rows);
         res.send(rows);
     });
-    
-    // queryToDoList = [];
 });
 
-
-router.get('/:id', (req, res, next) => {
-    // getAllToDoList();
-    
+router.get('/:id', (req, res, next) => {    
     db.all("SELECT * FROM ToDoList;", (err, rows) => {        
         rows.forEach((item) => {
             if(item.ToDoListID === parseInt(req.params.id)) {res.send(item);}
         });
     });
+});
 
-    // queryToDoList = [];
+router.post('/:title', (req, res, next) => {
+    db.run(`INSERT INTO ToDoList (Title) VALUES ('${req.params.title}');`, () => {
+        db.all("SELECT last_insert_rowid();", (err, rows) => {
+            res.send(`${rows[0]['last_insert_rowid()']}`);
+        });
+    });
+});
+
+router.put('/:id/:title', (req, res, next) => {
+    db.run(`UPDATE ToDoList SET Title = '${req.params.title}' WHERE ToDoListID = ${parseInt(req.params.id)};`, () => {
+        res.end();
+    });
+});
+
+router.delete('/:id', (req, res, next) => {
+    db.run(`DELETE FROM ToDoList WHERE ToDoListID = ${parseInt(req.params.id)};`, () => {
+        res.end();
+    });
 });
 
 
